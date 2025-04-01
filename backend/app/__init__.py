@@ -1,6 +1,7 @@
 from flask import Flask
 from app.routes import api_bp
 from app.utils.response_model import ResponseModel
+import os
 
 def register_error_handlers(app):
     """ Registers error handlers for the Flask app. """
@@ -35,7 +36,7 @@ def create_app():
     app = Flask(__name__)
 
     # Load configurations
-    # app.config.from_object('app.config.Config')
+    app.config.from_object('app.config.Config')
 
     # Register the Blueprints
     app.register_blueprint(api_bp, url_prefix='/api')
