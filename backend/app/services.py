@@ -1,5 +1,6 @@
 from langchain.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM
+from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 from app.config import Config
 
@@ -11,7 +12,10 @@ Respond in a few sentences and be concise.
 prompt = ChatPromptTemplate.from_template(template)
 
 def generate_response(query):
+    print(Config.LLM_WRAPPER)
+    print(Config.LLM_MODEL)
     if Config.LLM_WRAPPER == 'openai':
+        print("We're using openai")
         model = ChatOpenAI(
                     api_key=Config.OPENAI_API_KEY, 
                     model=Config.LLM_MODEL,
@@ -21,8 +25,9 @@ def generate_response(query):
                     max_retries=2
                 )
     else:
-        model = OllamaLLM(model=Config.LLM_MODEL, temperature=0, max_tokens=100)
+        model = ChatOllama(model=Config.LLM_MODEL, temperature=0, max_tokens=100)
         
     chain = prompt | model
     result = chain.invoke({'question': query})
-    return result
+
+    return result.content
