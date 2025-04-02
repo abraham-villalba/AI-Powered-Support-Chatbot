@@ -5,3 +5,5 @@ langchain-ollama
 langchain-openai
 marshmallow
 flask-cors
+pinecone-client
+langchain-pinecone
