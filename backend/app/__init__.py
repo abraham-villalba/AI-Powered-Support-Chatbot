@@ -28,6 +28,7 @@ def register_error_handlers(app):
     # In case of any other error, return a generic error message
     @app.errorhandler(Exception)
     def generic_error(error):
+        print(error)
         return ResponseModel(status='error', error={'code': 500, 'message': 'Internal Server Error'}).to_json(), 500
 
 
