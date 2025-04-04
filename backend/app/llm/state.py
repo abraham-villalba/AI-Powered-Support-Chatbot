@@ -6,7 +6,7 @@ class State(MessagesState):
     """Maintains chatbot conversation state."""
     sentiment: str
     intent: str
-    output: str
+    escalated: bool = False
 
 class SentimentRoute(BaseModel):
     """Defines the sentiment of the user."""

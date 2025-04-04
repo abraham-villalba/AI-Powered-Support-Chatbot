@@ -1,6 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
 
-template = """
+q_and_a_template = """
 You are an intelligent assistant in charge of answering user queries and booking appointments for a dentist clinic called HappyTeeth.\n
 Here are some guidelines to follow:
 1. If you don't know the answer, say that you don't know. \n
@@ -18,8 +18,26 @@ Previous interactions you had with the user:\n
 The user asked the following question: {question}\n
 """
 
+booking_template = """
+You are an intelligent assistant in charge of booking appointments for a dentist clinic called HappyTeeth.\n
+Here are some guidelines to follow:
+1. If the user is trying to make an appointment, make sure you have the relevant information (full name, date and time).\n
+2. If you have all the information, make the appointment and generate a random number to identify the booking.\n
+3. If you don't have all the information, ask the user for the missing information.\n
+4. If you have all the information, return the appointment details and the random number as the appointment ID.\n
+Here are the previous messages in the conversation:\n
+{memory}\n
+The last message from the user was: {last_message}\n
+"""
+
 def get_question_answering_prompt():
     """
     Returns the question-answering prompt.
     """
-    return ChatPromptTemplate.from_template(template)
+    return ChatPromptTemplate.from_template(q_and_a_template)
+
+def get_booking_prompt():
+    """
+    Returns the booking prompt.
+    """
+    return ChatPromptTemplate.from_template(booking_template)

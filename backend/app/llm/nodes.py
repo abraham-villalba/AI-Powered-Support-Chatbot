@@ -3,7 +3,7 @@ from langchain_openai import ChatOpenAI
 from app.llm.context import get_relevant_context
 from app.config import Config
 from app.llm.state import State, SentimentRoute, IntentRoute
-from app.llm.prompts import get_question_answering_prompt
+from app.llm.prompts import get_question_answering_prompt, get_booking_prompt
 from langchain_core.messages import (
     AIMessage,
     HumanMessage,
@@ -44,7 +44,7 @@ def analyze_sentiment(state: State):
             HumanMessage(content=last_message),
         ]
     )
-    return {"sentiment": decision.step}
+    return {"sentiment":  "neutral" if decision.step is None else decision.step}
 
 def sentiment_router(state: State):
     if state["sentiment"] == "frustrated":
@@ -56,7 +56,7 @@ def escalate_to_human(state: State):
     Escalates the query to a human agent.
     """
     print(f"Escalating to human with state: {state}")
-    return {"messages": [AIMessage(content="Escalating to human agent.")]}
+    return {"messages": [AIMessage(content="Your query has been escalated to a human agent. Please wait for further assistance.")], "escalated": True}
 
 def analyze_intent(state: State):
     """
@@ -76,7 +76,8 @@ def analyze_intent(state: State):
             HumanMessage(content=last_message),
         ]
     )
-    return {"intent": decision.step}
+
+    return {"intent": "ask_question" if decision.step is None else decision.step}
 
 def intent_router(state: State):
     if state["intent"] == "escalate_to_human":
@@ -90,8 +91,18 @@ def make_appointment(state: State):
     Makes an appointment for the user.
     """
     # Use the sentiment router to analyze the sentiment of the user.
+    previus_messages = get_conversation_history_context(state)
+    last_message = state["messages"][-1].content
+    # Use the booking prompt to make an appointment.
+    booking_prompt = get_booking_prompt()
+    booking_chain = booking_prompt | model
+
+    result = booking_chain.invoke({
+        "memory": previus_messages,
+        "last_message": last_message
+    })
     print(f"Making appointment")
-    return {"messages": [AIMessage(content="Making appointment.")]}
+    return {"messages": result}
 
 def ask_question(state: State):
     """
