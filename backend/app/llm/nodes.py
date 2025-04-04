@@ -1,6 +1,6 @@
 from langchain_ollama import ChatOllama
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_pinecone import PineconeVectorStore
+from langchain_openai import ChatOpenAI
+from app.llm.context import get_relevant_context
 from app.config import Config
 from app.llm.state import State, SentimentRoute, IntentRoute
 from app.llm.prompts import get_question_answering_prompt
@@ -30,10 +30,8 @@ def analyze_sentiment(state: State):
     """
     Analyzes the sentiment of the user.
     """
-    # Use the sentiment router to analyze the sentiment of the user.
     print(f"Analyzing sentiment")
     last_message = state["messages"][-1].content
-    print(last_message)
     sentiment_model = model.with_structured_output(SentimentRoute)
     decision = sentiment_model.invoke(
         [
@@ -57,7 +55,6 @@ def escalate_to_human(state: State):
     """
     Escalates the query to a human agent.
     """
-    # Use the sentiment router to analyze the sentiment of the user.
     print(f"Escalating to human with state: {state}")
     return {"messages": [AIMessage(content="Escalating to human agent.")]}
 
@@ -66,7 +63,6 @@ def analyze_intent(state: State):
     Analyzes the intent of the user.
     """
     intent_router = model.with_structured_output(IntentRoute)
-    # Use the sentiment router to analyze the sentiment of the user.
     last_message = state["messages"][-1].content
     print(f"Analyzing intent")
     decision = intent_router.invoke(
@@ -102,7 +98,6 @@ def ask_question(state: State):
     Answers the user's question.
     """
     print(f"Answering question")
-    # Use the sentiment router to analyze the sentiment of the user.
     user_question = state["messages"][-1].content
     # Trim the messages to avoid exceeding the token limit.
     selected_messages = trim_messages(
@@ -119,8 +114,10 @@ def ask_question(state: State):
             previus_messages += f"User: {selected_messages[i].content}\n"
         elif isinstance(selected_messages[i], AIMessage):
             previus_messages += f"You: {selected_messages[i].content}\n"
-    
-    context = "No additional context found."
+    # Get the relevant context for the question.
+    context = get_relevant_context(user_question)
+
+    # Build the prompt and chain.
     propmt = get_question_answering_prompt()
     chain = propmt | model
 
