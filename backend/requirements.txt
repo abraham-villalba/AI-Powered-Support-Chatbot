@@ -7,3 +7,4 @@ marshmallow
 flask-cors
 pinecone-client
 langchain-pinecone
+langgraph
