@@ -32,14 +32,15 @@ def analyze_sentiment(state: State):
     """
     print(f"Analyzing sentiment")
     last_message = state["messages"][-1].content
+    # Use the sentiment model to analyze the sentiment of the user.
     sentiment_model = model.with_structured_output(SentimentRoute)
     decision = sentiment_model.invoke(
         [
             SystemMessage(
                 content="Classify the sentiment of the user message based on the last message in the " \
-                    "conversation. Only sentiments available are [frustrated, neutral], if you are not sure, " \
+                    "conversation. Only sentiments available are [positive, neutral, negative], if you are not sure, " \
                     "say neutral. Think about the state of the user, if he is just asking a question or chatting, " \
-                    "the sentiment is neutral. If the user is frustrated, the sentiment is frustrated. " 
+                    "the sentiment is positive. " 
             ),
             HumanMessage(content=last_message),
         ]
@@ -47,7 +48,7 @@ def analyze_sentiment(state: State):
     return {"sentiment":  "neutral" if decision.step is None else decision.step}
 
 def sentiment_router(state: State):
-    if state["sentiment"] == "frustrated":
+    if state["sentiment"] == "negative":
         return "escalate_to_human"
     return "analyze_intent"
 
@@ -125,6 +126,7 @@ def ask_question(state: State):
             previus_messages += f"User: {selected_messages[i].content}\n"
         elif isinstance(selected_messages[i], AIMessage):
             previus_messages += f"You: {selected_messages[i].content}\n"
+
     # Get the relevant context for the question.
     context = get_relevant_context(user_question)
 

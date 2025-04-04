@@ -10,9 +10,9 @@ class State(MessagesState):
 
 class SentimentRoute(BaseModel):
     """Defines the sentiment of the user."""
-    step: Literal["frustrated", "neutral"] = Field(
+    step: Literal["positive", "neutral", "negative"] = Field(
         None,
-        description="The sentiment of the user. Should be one of [frustrated, neutral]"
+        description="The sentiment of the user. Should be one of [positive, neutral, negative]"
     )
 
 class IntentRoute(BaseModel):
