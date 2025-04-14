@@ -17,7 +17,7 @@ logger.setLevel(logging.DEBUG)  # Use INFO or WARNING in production
 timestamp = datetime.now().strftime("%Y_%m_%d_%H:%M:%S")
 
 # File handler
-file_handler = logging.FileHandler(f"{LOG_DIR}/{timestamp}_video_analyzer.log")
+file_handler = logging.FileHandler(f"{LOG_DIR}/{timestamp}_chatbot_api.log")
 file_handler.setLevel(logging.DEBUG)
 
 # Console handler
