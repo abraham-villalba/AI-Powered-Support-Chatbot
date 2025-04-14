@@ -1,0 +1,15 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+    environment:
+      - BACKEND_URI=http://backend:5000
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    env_file: ./backend/.env

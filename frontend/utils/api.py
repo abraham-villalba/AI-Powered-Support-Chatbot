@@ -1,4 +1,11 @@
 import requests
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+
+BACKEND_URI = os.environ.get("BACKEND_URI", "http://localhost:5000")
 
 def generate_response(query : str, session_id : str) -> str:
     """Generate a response from the chatbot API.
@@ -20,7 +27,7 @@ def generate_response(query : str, session_id : str) -> str:
     bot_response = ""
     try:
         response = requests.post(
-            "http://127.0.0.1:5000/api/chat",
+            f"{BACKEND_URI}/api/chat",
             headers={"Content-Type": "application/json"},
             json={
                 "query": query,
@@ -33,6 +40,7 @@ def generate_response(query : str, session_id : str) -> str:
         else:
             bot_response = "Oops, something went wrong. Please try again."
     except requests.exceptions.RequestException as e:
-            bot_response = f"Error: I'm unable to connect to the server. Please check your connection or try again later."
+            print(str(e))
+            bot_response = f"Error: I'm unable to connect to the server. Please check your connection or try again later." + str(e) + BACKEND_URI
     
     return bot_response

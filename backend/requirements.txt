@@ -8,3 +8,4 @@ flask-cors
 pinecone-client
 langchain-pinecone
 langgraph
+grandalf
