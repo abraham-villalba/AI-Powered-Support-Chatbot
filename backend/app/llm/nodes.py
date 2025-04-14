@@ -4,6 +4,7 @@ from app.llm.context import get_relevant_context
 from app.config import Config
 from app.llm.state import State, SentimentRoute, IntentRoute
 from app.llm.prompts import get_question_answering_prompt, get_booking_prompt
+from app.utils.logger import logger
 from langchain_core.messages import (
     AIMessage,
     HumanMessage,
@@ -14,6 +15,7 @@ from langchain_core.messages import (
 
 # LLM Selection
 if Config.LLM_WRAPPER == 'openai':
+    logger.info(f"Using OpenAI LLM Wrapper with model {Config.LLM_MODEL}")
     model = ChatOpenAI(
                 api_key=Config.OPENAI_API_KEY, 
                 model=Config.LLM_MODEL,
@@ -23,6 +25,7 @@ if Config.LLM_WRAPPER == 'openai':
                 max_retries=2
             )
 else:
+    logger.info(f"Using Ollama LLM Wrapper with model {Config.LLM_MODEL}")
     model = ChatOllama(model=Config.LLM_MODEL, temperature=0.7, max_tokens=100)
 
 # We will define our nodes here.
@@ -30,7 +33,7 @@ def analyze_sentiment(state: State):
     """
     Analyzes the sentiment of the user.
     """
-    print(f"Analyzing sentiment")
+    logger.info(f"Analyzing sentiment")
     last_message = state["messages"][-1].content
     # Use the sentiment model to analyze the sentiment of the user.
     sentiment_model = model.with_structured_output(SentimentRoute)
@@ -56,7 +59,7 @@ def escalate_to_human(state: State):
     """
     Escalates the query to a human agent.
     """
-    print(f"Escalating to human with state: {state}")
+    logger.info(f"Escalating to human with state: {state}")
     return {"messages": [AIMessage(content="Your query has been escalated to a human agent. Please wait for further assistance.")], "escalated": True}
 
 def analyze_intent(state: State):
@@ -65,7 +68,7 @@ def analyze_intent(state: State):
     """
     intent_router = model.with_structured_output(IntentRoute)
     last_message = state["messages"][-1].content
-    print(f"Analyzing intent")
+    logger.info(f"Analyzing intent")
     decision = intent_router.invoke(
         [
             SystemMessage(
@@ -102,14 +105,14 @@ def make_appointment(state: State):
         "memory": previus_messages,
         "last_message": last_message
     })
-    print(f"Making appointment")
+    logger.info(f"Making appointment")
     return {"messages": result}
 
 def ask_question(state: State):
     """
     Answers the user's question.
     """
-    print(f"Answering question")
+    logger.info(f"Answering question")
     user_question = state["messages"][-1].content
     # Trim the messages to avoid exceeding the token limit.
     selected_messages = trim_messages(
@@ -129,7 +132,7 @@ def ask_question(state: State):
 
     # Get the relevant context for the question.
     context = get_relevant_context(user_question)
-
+    logger.debug(f"Context retrieved: {context}")
     # Build the prompt and chain.
     propmt = get_question_answering_prompt()
     chain = propmt | model
