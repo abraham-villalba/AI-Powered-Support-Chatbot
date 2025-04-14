@@ -1,6 +1,7 @@
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph, START, END
 from app.llm.state import State
+from app.utils.logger import logger
 from langchain_core.messages import HumanMessage
 from app.llm.nodes import (
     analyze_sentiment,
@@ -53,7 +54,7 @@ graph.add_edge("ask_question", END)
 
 workflow = graph.compile(checkpointer=memory)
 
-print(workflow.get_graph().draw_ascii())
+logger.info(workflow.get_graph().draw_ascii())
 
 def generate_response(query, session_id):
     """Generates a response to the user's query.
@@ -66,5 +67,5 @@ def generate_response(query, session_id):
     config = {"configurable": {"thread_id": session_id}}
     input_message = HumanMessage(content=query)
     response = workflow.invoke({"messages": [input_message]}, config)
-    print(response["messages"][-1].pretty_print())
+    logger.debug(f"Response to query: {query} is \n RESPONSE: {response['messages'][-1].content}")
     return response.get("messages")[-1].content

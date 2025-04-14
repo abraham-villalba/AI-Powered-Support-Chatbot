@@ -3,6 +3,7 @@ from app.utils.schemas import ChatRequestSchema, validate_chat_request
 from app.utils.response_model import ResponseModel
 from app.llm.workflow import generate_response
 from flask_cors import cross_origin
+from app.utils.logger import logger
 
 
 # Create a Blueprint object to define the routes
@@ -15,9 +16,10 @@ def chat():
     data, errors = validate_chat_request(request.get_json(), ChatRequestSchema())
 
     if errors:
+        logger.error(f"Chat endpoint validation errors: {errors}")
         return ResponseModel(status="error", error=errors).to_json(), 400 # Bad Request
 
     query = data['query']
-    print(f"Request: {data}")
+    logger.info(f"Chat endpoint called by {data['session_id']}")
     result = generate_response(query, data['session_id'])
     return ResponseModel(status='success', data={'response': result}).to_json(), 200
