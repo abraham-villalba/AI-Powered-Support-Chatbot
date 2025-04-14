@@ -12,4 +12,6 @@ services:
     build: ./backend
     ports:
       - "5000:5000"
+    volumes:
+      - ./backend/logs:/app/logs
     env_file: ./backend/.env
